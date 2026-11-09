@@ -168,6 +168,36 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
   }
 
   /**
+   * Tests that the form route enforces the subscribe access operation.
+   */
+  public function testFormRouteAccess(): void {
+    $assert_session = $this->assertSession();
+    $anonymous = Role::load(RoleInterface::ANONYMOUS_ID);
+
+    $node = $this->drupalCreateNode(['type' => 'page', 'title' => 'My node']);
+
+    // Without the permission, the form route returns 403.
+    $anonymous->revokePermission('subscribe to newsroom node notifications')->save();
+    $this->drupalGet('/newsroom-node/' . $node->id() . '/subscribe');
+    $assert_session->statusCodeEquals(403);
+
+    // With the permission, the form is accessible.
+    $this->grantPermissions($anonymous, ['subscribe to newsroom node notifications']);
+    $this->drupalGet('/newsroom-node/' . $node->id() . '/subscribe');
+    $assert_session->statusCodeEquals(200);
+    $assert_session->fieldExists('email');
+
+    // An unpublished node returns 403 on the form route.
+    $unpublished_node = $this->drupalCreateNode([
+      'type' => 'page',
+      'title' => 'Unpublished node',
+      'status' => 0,
+    ]);
+    $this->drupalGet('/newsroom-node/' . $unpublished_node->id() . '/subscribe');
+    $assert_session->statusCodeEquals(403);
+  }
+
+  /**
    * Tests an API failure when submitting without JavaScript.
    */
   public function testFormWithoutJavascriptApiFailure(): void {
@@ -212,14 +242,14 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
     $assert_session->addressEquals($node->toUrl());
     $assert_session->pageTextContains('Something went wrong while confirming your subscription. Please try again.');
 
-    // An unpublished node is not exposed by the confirmation route.
+    // An unpublished node is not accessible via the confirmation route.
     $unpublished_node = $this->drupalCreateNode([
       'type' => 'page',
       'title' => 'Unpublished node',
       'status' => 0,
     ]);
     $this->drupalGet(Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $unpublished_node->id()]));
-    $assert_session->statusCodeEquals(404);
+    $assert_session->statusCodeEquals(403);
 
     // A non-existent node is not exposed by the confirmation route.
     $node->delete();
