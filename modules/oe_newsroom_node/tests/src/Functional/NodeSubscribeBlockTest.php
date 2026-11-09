@@ -72,8 +72,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
     $assert_session->pageTextContains('My node');
     $assert_session->elementExists('css', '#block-node-subscribe');
     $link = $assert_session->elementExists('css', '.oe-newsroom-node__subscribe-link');
-    $this->assertSame('Subscribe to notifications', $link->getText());
-    // The link points to the modal route and uses ajax.
+    $this->assertSame('Subscribe', $link->getText());
     $this->assertStringContainsString('/newsroom-node/' . $node->id() . '/subscribe', $link->getAttribute('href'));
 
     // The block is not shown on non-node pages.
