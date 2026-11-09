@@ -19,6 +19,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
+use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom_node\Domain\NodeSubscriptionService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -37,6 +38,7 @@ class NodeSubscribeForm extends FormBase {
 
   public function __construct(
     protected NodeSubscriptionService $nodeSubscriptionService,
+    protected readonly NewsroomConnection $newsroomConnection,
     protected readonly AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_node')]
@@ -178,6 +180,12 @@ class NodeSubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
+    if (!$this->newsroomConnection->isConfigured()) {
+      $this->messenger->addError($this->t('Subscriptions are not available at this time. Please try again later.'));
+      $form_state->setRebuild();
+      return;
+    }
+
     $email = $form_state->getValue('email');
     $node_id = $form_state->get('node_id');
     $node = Node::load($node_id);
