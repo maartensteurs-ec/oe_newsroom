@@ -9,14 +9,11 @@ use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\oe_newsroom\Newsroom;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Block to subscribe to node notifications.
@@ -29,38 +26,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     'node' => new EntityContextDefinition('entity:node', new TranslatableMarkup('Node')),
   ],
 )]
-class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInterface {
-
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    protected readonly ConfigFactoryInterface $configFactory,
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get(ConfigFactoryInterface::class),
-    );
-  }
+class NodeSubscribeBlock extends BlockBase {
 
   public function build(): array {
     /** @var \Drupal\node\NodeInterface $node */
     $node = $this->getContextValue('node');
-
-    // The privacy URL must be configured for the subscribe form to work.
-    if (empty($this->configFactory->get('oe_newsroom_node.settings')->get('privacy_url'))) {
-      return [];
-    }
-
     $url = Url::fromRoute('oe_newsroom_node.subscribe_form', ['node' => $node->id()]);
 
     return [

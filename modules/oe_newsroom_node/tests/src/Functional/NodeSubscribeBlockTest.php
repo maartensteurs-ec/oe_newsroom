@@ -118,7 +118,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
   }
 
   /**
-   * Tests that the block is hidden with an empty privacy URL.
+   * Tests that the block is visible even with an empty privacy URL.
    */
   public function testBlockWithEmptyPrivacyUrl(): void {
     $assert_session = $this->assertSession();
@@ -131,7 +131,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
     $this->drupalGet($node->toUrl());
     $assert_session->statusCodeEquals(200);
     $assert_session->pageTextContains('My node');
-    $assert_session->elementNotExists('css', '#block-node-subscribe');
+    $assert_session->elementExists('css', '#block-node-subscribe');
   }
 
   /**
