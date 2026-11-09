@@ -13,6 +13,7 @@ use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Newsroom;
 
 /**
@@ -44,7 +45,12 @@ class NodeSubscribeBlock extends BlockBase {
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account): AccessResultInterface {
-    return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom node notifications');
+    $node = $this->getContextValue('node');
+    if (!$node instanceof NodeInterface) {
+      return AccessResult::forbidden()->addCacheableDependency($node);
+    }
+
+    return $node->access('oe_newsroom_node.subscribe', $account, TRUE);
   }
 
   public function getCacheTags(): array {

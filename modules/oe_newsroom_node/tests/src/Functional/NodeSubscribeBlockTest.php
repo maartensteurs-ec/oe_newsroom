@@ -135,6 +135,39 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
   }
 
   /**
+   * Tests that the block respects node view access for unpublished nodes.
+   */
+  public function testBlockAccessUnpublishedNode(): void {
+    $assert_session = $this->assertSession();
+
+    $owner = $this->drupalCreateUser([
+      'subscribe to newsroom node notifications',
+      'view own unpublished content',
+    ]);
+    $other_user = $this->drupalCreateUser([
+      'subscribe to newsroom node notifications',
+    ]);
+
+    $unpublished_node = $this->drupalCreateNode([
+      'type' => 'page',
+      'title' => 'Unpublished node',
+      'status' => 0,
+      'uid' => $owner->id(),
+    ]);
+
+    // The owner can see the block on their own unpublished node.
+    $this->drupalLogin($owner);
+    $this->drupalGet($unpublished_node->toUrl());
+    $assert_session->statusCodeEquals(200);
+    $assert_session->elementExists('css', '#block-node-subscribe');
+
+    // Another user without 'view own unpublished content' gets 403.
+    $this->drupalLogin($other_user);
+    $this->drupalGet($unpublished_node->toUrl());
+    $assert_session->statusCodeEquals(403);
+  }
+
+  /**
    * Tests an API failure when submitting without JavaScript.
    */
   public function testFormWithoutJavascriptApiFailure(): void {
