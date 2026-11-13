@@ -38,11 +38,11 @@ class NodeSubscribeForm extends FormBase {
 
   public function __construct(
     protected NodeSubscriptionService $nodeSubscriptionService,
-    protected readonly NewsroomConnection $newsroomConnection,
-    protected readonly AccountProxyInterface $accountProxy,
+    protected NewsroomConnection $newsroomConnection,
+    protected AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_node')]
-    protected readonly LoggerInterface $logger,
+    protected LoggerInterface $logger,
     protected LanguageManagerInterface $languageManager,
   ) {
     $this->setMessenger($messenger);
