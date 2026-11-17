@@ -66,16 +66,18 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
     $url = Url::fromRoute('oe_newsroom_node.subscribe_form', ['node' => $node->id()]);
 
     return [
-      '#theme' => 'oe_newsroom_node_subscribe_button',
-      '#url' => $url,
-      '#label' => $this->t('Subscribe to notifications'),
-      '#attributes' => [
-        'class' => ['use-ajax'],
-        'data-dialog-type' => 'modal',
-        'data-dialog-options' => Json::encode(['width' => 800]),
-      ],
-      '#attached' => [
-        'library' => ['core/drupal.dialog.ajax'],
+      'link' => [
+        '#type' => 'link',
+        '#title' => $this->t('Subscribe to notifications'),
+        '#url' => $url,
+        '#attributes' => [
+          'class' => ['use-ajax', 'oe-newsroom-node__subscribe-link'],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => Json::encode(['width' => 800]),
+        ],
+        '#attached' => [
+          'library' => ['core/drupal.dialog.ajax'],
+        ],
       ],
     ];
   }
